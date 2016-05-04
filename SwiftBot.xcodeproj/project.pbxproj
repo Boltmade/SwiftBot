@@ -118,10 +118,10 @@
 		53822E2B1CD918B400AC92E9 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				53822E2E1CD91C9500AC92E9 /* SBMessage.swift */,
 				53822E391CD9233900AC92E9 /* SBNetwork.swift */,
 				53822E331CD91CED00AC92E9 /* SwiftBot.swift */,
 				53822E301CD91CD300AC92E9 /* kik */,
-				53822E2E1CD91C9500AC92E9 /* SBMessage.swift */,
 			);
 			path = src;
 			sourceTree = "<group>";

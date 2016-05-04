@@ -14,16 +14,16 @@ public enum KikKeyboardType {
 
 internal struct KikKeyboard {
     let keyboardType: KikKeyboardType = .Suggested
-    let responses: [KikResponse]
+    let responses: [KikSuggestedResponse]
 
     init(suggestedResponses: [String]) {
         self.responses = suggestedResponses.map {
-            KikResponse(type: .Text, body: $0)
+            KikSuggestedResponse(type: .Text, body: $0)
         }
     }
 }
 
-internal struct KikResponse {
+internal struct KikSuggestedResponse {
     let type: KikMessageType
     let body: String
 }
