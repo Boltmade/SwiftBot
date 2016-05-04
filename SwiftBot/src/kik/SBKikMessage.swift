@@ -1,4 +1,4 @@
-public enum KikMessageType {
+public enum SBKikMessageType {
     case Text
     case Picture
     case Video
@@ -27,78 +27,77 @@ public enum KikMessageType {
     }
 }
 
-public enum KikKeyboardType {
+public enum SBKikKeyboardType {
     case Suggested
 }
 
 internal struct KikKeyboard {
-    let keyboardType: KikKeyboardType = .Suggested
-    let responses: [KikSuggestedResponse]
+    let keyboardType: SBKikKeyboardType = .Suggested
+    let responses: [SBKikSuggestedResponse]
 
     init(suggestedResponses: [String]) {
         self.responses = suggestedResponses.map {
-            KikSuggestedResponse(type: .Text, body: $0)
+            SBKikSuggestedResponse(type: .Text, body: $0)
         }
     }
 }
 
-internal struct KikSuggestedResponse {
-    let type: KikMessageType
+internal struct SBKikSuggestedResponse {
+    let type: SBKikMessageType
     let body: String
 }
 
-public typealias KikUser = String
-public protocol KikMessage: SBMessage {
-    var type: KikMessageType { get }
+public typealias SBKikUser = String
+public protocol SBKikMessage: SBMessage {
+    var type: SBKikMessageType { get }
     var chatId: String { get }
     var id: String { get }
-    var from: KikUser { get }
-    var participants: [KikUser]? { get }
+    var from: SBKikUser { get }
+    var participants: [SBKikUser]? { get }
     var timestamp: Int64 { get }
     var mention: String? { get }
-    var to: KikUser? { get }
+    var to: SBKikUser? { get }
 }
 
-public protocol KikAttribution {
+public protocol SBKikAttribution {
     var name: String { get }
     var iconURL: NSURL { get }
 }
 
-public protocol KikVideoMessage: KikMessage {
+public protocol SBKikVideoMessage: SBKikMessage {
     var videoURL: NSURL { get }
     var loop: Bool { get }
     var muted: Bool { get }
     var autoPlay: Bool { get }
     var noSave: Bool { get }
-    var attribution: KikAttribution { get }
+    var attribution: SBKikAttribution { get }
 }
 
-public protocol KikTextMessage: KikMessage {
+public protocol SBKikTextMessage: SBKikMessage {
     var body: String { get }
 }
 
-public protocol KikPictureMessage: KikMessage {
+public protocol SBKikPictureMessage: SBKikMessage {
     var pictureURL: NSURL { get }
-    var attribution: KikAttribution { get }
+    var attribution: SBKikAttribution { get }
 }
 
-public protocol KikMessageSend: SBMessage {
-    var type: KikMessageType { get }
+public protocol SBKikMessageSend: SBMessage {
+    var type: SBKikMessageType { get }
     var chatId: String { get }
-    var to: KikUser { get }
+    var to: SBKikUser { get }
     var suggestedResponses: [String]? { get }
 }
 
-extension KikMessageSend {
+extension SBKikMessageSend {
     internal func toJSON() -> JSON {
         return [String: AnyObject]()
     }
 }
 
-extension KikTextMessageSend {
+extension SBKikTextMessageSend {
     internal func toJSON() -> JSON {
         return [
-//            "chatId": self.chatId,
             "to": self.to,
             "type": self.type.toString(),
             "body": self.body,
@@ -106,6 +105,6 @@ extension KikTextMessageSend {
     }
 }
 
-public protocol KikTextMessageSend: KikMessageSend {
+public protocol SBKikTextMessageSend: SBKikMessageSend {
     var body: String { get }
 }
