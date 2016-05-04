@@ -21,11 +21,19 @@ public class SwiftBot {
         self.handlers = handlers
     }
 
-    public func execute(message: JSON) -> [SBResponses]? {
-        return nil
+    public func execute(message: JSON) -> [SBResponses] {
+        return [SBResponses]()
+    }
+
+    public func send(responses: [SBResponses]) {
+
     }
 }
 
 public struct SBResponses {
-    var responseMessages = [SBMessage]()
+    public var responseMessages: [SBMessage]
+
+    public init(responseMessages: [SBMessage]) {
+        self.responseMessages = responseMessages
+    }
 }

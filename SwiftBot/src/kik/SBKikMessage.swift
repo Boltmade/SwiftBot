@@ -6,6 +6,25 @@ public enum KikMessageType {
     case StartChatting
     case ScanData
     case Sticker
+
+    func toString() -> String {
+        switch self {
+        case .Text:
+            return "text"
+        case .Picture:
+            return "picture"
+        case .Video:
+            return "video"
+        case .Link:
+            return "link"
+        case .StartChatting:
+            return "start-chatting"
+        case .ScanData:
+            return "scan-data"
+        case .Sticker:
+            return "sticker"
+        }
+    }
 }
 
 public enum KikKeyboardType {
@@ -31,10 +50,10 @@ internal struct KikSuggestedResponse {
 public typealias KikUser = String
 public protocol KikMessage: SBMessage {
     var type: KikMessageType { get }
-    var chatID: String { get }
+    var chatId: String { get }
     var id: String { get }
     var from: KikUser { get }
-    var participants: [KikUser] { get }
+    var participants: [KikUser]? { get }
     var timestamp: Int64 { get }
     var mention: String? { get }
     var to: KikUser? { get }
@@ -63,15 +82,28 @@ public protocol KikPictureMessage: KikMessage {
     var attribution: KikAttribution { get }
 }
 
-public protocol KikMessageSend: KikMessage {
-    var chatID: String? { get }
-    var id: String? { get }
-    var from: KikUser? { get }
-    var participants: [KikUser]? { get }
-    var timestamp: Int64? { get }
+public protocol KikMessageSend: SBMessage {
+    var type: KikMessageType { get }
+    var chatId: String { get }
     var to: KikUser { get }
     var suggestedResponses: [String]? { get }
-    func toJSON() -> JSON
+}
+
+extension KikMessageSend {
+    internal func toJSON() -> JSON {
+        return [String: AnyObject]()
+    }
+}
+
+extension KikTextMessageSend {
+    internal func toJSON() -> JSON {
+        return [
+//            "chatId": self.chatId,
+            "to": self.to,
+            "type": self.type.toString(),
+            "body": self.body,
+        ]
+    }
 }
 
 public protocol KikTextMessageSend: KikMessageSend {

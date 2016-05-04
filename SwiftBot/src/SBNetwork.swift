@@ -4,7 +4,7 @@ enum KikApiRouter: URLRequestConvertible {
     static let baseURLString = "https://api.kik.com/v1"
 
     case KikConfigure(webHook: String, features: [String: Bool])
-    case KikSendMessage(kikMessages: [KikMessageSend])
+    case KikSendMessage(kikMessages: [JSON])
 
     var method: Alamofire.Method {
         switch self {
@@ -32,13 +32,15 @@ enum KikApiRouter: URLRequestConvertible {
 
         switch self {
         case .KikConfigure(let webHook, let features):
-            return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters: [
+            return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters:
+                [
                     "webhook": webHook,
                     "features": features
                 ]).0
         case .KikSendMessage(let kikMessages):
-            return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters: [
-                    "messages": kikMessages.map { $0.toJSON() },
+            return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters:
+                [
+                    "messages": kikMessages
                 ]).0
         }
     }

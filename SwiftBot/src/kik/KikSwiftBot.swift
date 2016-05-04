@@ -18,27 +18,27 @@ public class KikSwiftBot: SwiftBot {
     struct IncomingMessageText: KikTextMessage {
         var body: String
         var type: KikMessageType
-        var chatID: String
+        var chatId: String
         var id: String
         var from: KikUser
-        var participants: [KikUser]
+        var participants: [KikUser]?
         var timestamp: Int64
         var mention: String?
         var to: KikUser?
 
         init(body: String,
              type: KikMessageType,
-             chatID: String,
+             chatId: String,
              id: String,
              from: KikUser,
-             participants: [KikUser],
+             participants: [KikUser]?,
              timestamp: Int64,
              mention: String?,
              to: KikUser?) {
 
                 self.body = body
                 self.type = type
-                self.chatID = chatID
+                self.chatId = chatId
                 self.id = id
                 self.from = from
                 self.participants = participants
@@ -48,20 +48,45 @@ public class KikSwiftBot: SwiftBot {
         }
 
         static func messageWith(json: JSON) -> IncomingMessageText? {
-            if let chatID = json["chat_id"] as? String,
+            if let chatId = json["chatId"] as? String,
                 let id = json["id"] as? String,
                 let typeString = json["type"] as? String,
-                let fromString = json["from"] as? String,
-                let body = json["body"] as? [String],
-                let timestamp = json["timestamp"] as? Int64,
-                let mention = json["mention"] as? String {
-                
+                let from = json["from"] as? KikUser,
+                let body = json["body"] as? String,
+                let timestampAny = json["timestamp"] as? Int
+                 where typeString == "text" {
+
+                    return IncomingMessageText(
+                        body: body,
+                        type: .Text,
+                        chatId: chatId,
+                        id: id,
+                        from: from,
+                        participants: nil,
+                        timestamp: Int64(timestampAny),
+                        mention: nil,
+                        to: nil)
             }
             return nil
         }
     }
 
-    override public func execute(message: JSON) -> [SBResponses]? {
+    override public func send(responses: [SBResponses]) {
+        let json = responses
+            .map { $0.responseMessages }
+            .flatten()
+            .filter { return $0 is KikTextMessageSend }
+            .map { ($0 as! KikTextMessageSend).toJSON() }
+        if json.count > 0 {
+            do {
+                try self.sendMessages(json)
+            } catch let e {
+                print("Error: \(e)")
+            }
+        }
+    }
+
+    override public func execute(message: JSON) -> [SBResponses] {
 
         func something(
             responses: SBResponses,
@@ -78,7 +103,7 @@ public class KikSwiftBot: SwiftBot {
 
         // Execute Chain
         if let messages = message["messages"] as? [JSON] {
-            let responses = SBResponses()
+            let responses = SBResponses(responseMessages: [])
             let textMessageResponses = messages
                 .filter{ ($0["type"] as? String) == "text" }
                 .map{ IncomingMessageText.messageWith($0) }
@@ -87,7 +112,7 @@ public class KikSwiftBot: SwiftBot {
                 .map{ something(responses, handlers: self.handlers, message: $0) }
             return textMessageResponses
         }
-        return nil
+        return [SBResponses]()
     }
 }
 
@@ -101,13 +126,24 @@ extension KikSwiftBot {
         return SBResult<SBKikConfig>(value: nil, error: "Bot not configured")
     }
 
-    public func sendMessage(kikMessage: KikMessageSend) throws {
+    internal func sendMessages(kikMessages: [JSON]) throws {
         let configResult = configuredGuard()
         guard let config = configResult.value else {
             print(configResult.error)
                 throw KikError.BadConfifguration
         }
-        
+
+        Alamofire
+            .request(KikApiRouter.KikSendMessage(kikMessages: kikMessages))
+            .authenticate(user: config.username, password: config.key)
+            .validate()
+            .responseJSON() { (firedResponse) -> Void in
+                if let error = firedResponse.result.error {
+                    print("Send message failed: \(error)")
+                } else {
+                    print("Successful send")
+                }
+        }
     }
 
     public func kikConfigure(username: String, APIKey: String, webHook: String) {
