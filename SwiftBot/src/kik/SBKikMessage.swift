@@ -102,6 +102,42 @@ public struct SBKikVideoMessage: SBKikMessage {
         ]
     }
 
+    static func messageWith(json: JSON) -> SBKikMessage? {
+        guard let type = json["type"] as? String
+            where type == "video" else {
+                return nil
+        }
+
+        if let chatId = json["chatId"] as? String,
+            let id = json["id"] as? String,
+            let typeString = json["type"] as? String,
+            let from = json["from"] as? SBKikUser,
+            let pictureUrl = json["picUrl"] as? String,
+            let timestampAny = json["timestamp"] as? Int,
+            let videoUrl = json["videoUrl"] as? String,
+            let loop = json["loop"] as? Bool,
+            let muted = json["muted"] as? Bool,
+            let autoplay = json["autoplay"] as? Bool,
+            let noSave = json["noSave"] as? Bool {
+
+            return SBKikVideoMessage(
+                chatId: chatId,
+                id: id,
+                from: from,
+                participants: nil,
+                timestamp: timestampAny,
+                mention: nil,
+                to: nil,
+                videoUrl: videoUrl,
+                loop: loop,
+                muted: muted,
+                autoplay: autoplay,
+                noSave: noSave,
+                attribution: nil)
+        }
+        return nil
+    }
+
     public init(
         chatId: String? = nil,
         id: String? = nil,
@@ -179,6 +215,32 @@ public struct SBKikTextMessage: SBKikMessage {
             "body": self.body
         ]
     }
+
+    static func messageWith(json: JSON) -> SBKikMessage? {
+        guard let type = json["type"] as? String
+            where type == "text" else {
+                return nil
+        }
+
+        if let chatId = json["chatId"] as? String,
+            let id = json["id"] as? String,
+            let typeString = json["type"] as? String,
+            let from = json["from"] as? SBKikUser,
+            let body = json["body"] as? String,
+            let timestampAny = json["timestamp"] as? Int {
+
+            return SBKikTextMessage(
+                chatId: chatId,
+                id: id,
+                from: from,
+                participants: nil,
+                timestamp: timestampAny,
+                mention: nil,
+                to: nil,
+                body: body)
+        }
+        return nil
+    }
 }
 
 public struct SBKikPictureMessage: SBKikMessage {
@@ -209,64 +271,6 @@ public struct SBKikPictureMessage: SBKikMessage {
         ]
     }
 
-    public init(
-        chatId: String? = nil,
-        id: String? = nil,
-        from: SBKikUser? = nil,
-        participants: [SBKikUser]? = nil,
-        timestamp: Int? = nil,
-        mention: String? = nil,
-        to: SBKikUser? = nil,
-        attribution: SBKikAttribution? = nil,
-        pictureUrl: String) {
-
-        self.chatId = chatId
-        self.id = id
-        self.from = from
-        self.participants = participants
-        self.timestamp = timestamp
-        self.mention = mention
-        self.to = to
-        self.attribution = attribution
-        self.pictureUrl = pictureUrl
-    }
-}
-
-extension SBKikMessage {
-    func messageWith(json: JSON) -> SBKikMessage? {
-        return nil
-    }
-}
-
-extension SBKikTextMessage {
-    static func messageWith(json: JSON) -> SBKikMessage? {
-        guard let type = json["type"] as? String
-            where type == "text" else {
-                return nil
-        }
-
-        if let chatId = json["chatId"] as? String,
-            let id = json["id"] as? String,
-            let typeString = json["type"] as? String,
-            let from = json["from"] as? SBKikUser,
-            let body = json["body"] as? String,
-            let timestampAny = json["timestamp"] as? Int {
-
-            return SBKikTextMessage(
-                chatId: chatId,
-                id: id,
-                from: from,
-                participants: nil,
-                timestamp: timestampAny,
-                mention: nil,
-                to: nil,
-                body: body)
-        }
-        return nil
-    }
-}
-
-extension SBKikPictureMessage {
     static func messageWith(json: JSON) -> SBKikMessage? {
         guard let type = json["type"] as? String
             where type == "picture" else {
@@ -293,42 +297,32 @@ extension SBKikPictureMessage {
         }
         return nil
     }
+
+    public init(
+        chatId: String? = nil,
+        id: String? = nil,
+        from: SBKikUser? = nil,
+        participants: [SBKikUser]? = nil,
+        timestamp: Int? = nil,
+        mention: String? = nil,
+        to: SBKikUser? = nil,
+        attribution: SBKikAttribution? = nil,
+        pictureUrl: String) {
+
+        self.chatId = chatId
+        self.id = id
+        self.from = from
+        self.participants = participants
+        self.timestamp = timestamp
+        self.mention = mention
+        self.to = to
+        self.attribution = attribution
+        self.pictureUrl = pictureUrl
+    }
 }
 
-extension SBKikVideoMessage {
-    static func messageWith(json: JSON) -> SBKikMessage? {
-        guard let type = json["type"] as? String
-            where type == "video" else {
-                return nil
-        }
-
-        if let chatId = json["chatId"] as? String,
-            let id = json["id"] as? String,
-            let typeString = json["type"] as? String,
-            let from = json["from"] as? SBKikUser,
-            let pictureUrl = json["picUrl"] as? String,
-            let timestampAny = json["timestamp"] as? Int,
-            let videoUrl = json["videoUrl"] as? String,
-            let loop = json["loop"] as? Bool,
-            let muted = json["muted"] as? Bool,
-            let autoplay = json["autoplay"] as? Bool,
-            let noSave = json["noSave"] as? Bool {
-
-            return SBKikVideoMessage(
-                chatId: chatId,
-                id: id,
-                from: from,
-                participants: nil,
-                timestamp: timestampAny,
-                mention: nil,
-                to: nil,
-                videoUrl: videoUrl,
-                loop: loop,
-                muted: muted,
-                autoplay: autoplay,
-                noSave: noSave,
-                attribution: nil)
-        }
+extension SBKikMessage {
+    func messageWith(json: JSON) -> SBKikMessage? {
         return nil
     }
 }
