@@ -15,76 +15,20 @@ public class KikSwiftBot: SwiftBot {
     internal var botUsername: SBKikUser?
     internal var apiKey: String?
 
-    struct IncomingMessageText: SBKikTextMessage {
-        var body: String
-        var type: SBKikMessageType
-        var chatId: String
-        var id: String
-        var from: SBKikUser
-        var participants: [SBKikUser]?
-        var timestamp: Int64
-        var mention: String?
-        var to: SBKikUser?
-
-        init(body: String,
-             type: SBKikMessageType,
-             chatId: String,
-             id: String,
-             from: SBKikUser,
-             participants: [SBKikUser]?,
-             timestamp: Int64,
-             mention: String?,
-             to: SBKikUser?) {
-
-                self.body = body
-                self.type = type
-                self.chatId = chatId
-                self.id = id
-                self.from = from
-                self.participants = participants
-                self.timestamp = timestamp
-                self.mention = mention
-                self.to = to
-        }
-
-        static func messageWith(json: JSON) -> IncomingMessageText? {
-            if let chatId = json["chatId"] as? String,
-                let id = json["id"] as? String,
-                let typeString = json["type"] as? String,
-                let from = json["from"] as? SBKikUser,
-                let body = json["body"] as? String,
-                let timestampAny = json["timestamp"] as? Int
-                 where typeString == "text" {
-
-                    return IncomingMessageText(
-                        body: body,
-                        type: .Text,
-                        chatId: chatId,
-                        id: id,
-                        from: from,
-                        participants: nil,
-                        timestamp: Int64(timestampAny),
-                        mention: nil,
-                        to: nil)
-            }
-            return nil
-        }
-    }
-
     override public func send(responses: [SBResponses]) {
         let responseMessages = responses
             .map { $0.responseMessages }
             .flatten()
-        let textMessages = responseMessages.filter { return $0 is SBKikTextMessageSend }
 
-        let json = responses
-            .map { $0.responseMessages }
-            .flatten()
-            .filter { return $0 is SBKikTextMessageSend }
-            .map { ($0 as! SBKikTextMessageSend).toJSON() }
-        if json.count > 0 {
+        let messages = responseMessages
+            .filter {
+                return $0 is SBKikMessage && ($0 as! SBKikMessage).canSend()
+            }
+            .map { ($0 as! SBKikMessage).jsonSerialize() }
+
+        if messages.count > 0 {
             do {
-                try self.sendMessages(json)
+                try self.sendMessages(messages)
             } catch let e {
                 print("Error: \(e)")
             }
@@ -93,29 +37,45 @@ public class KikSwiftBot: SwiftBot {
 
     override public func execute(message: JSON) -> [SBResponses] {
 
-        func something(
+        func recursiveHandle(
             responses: SBResponses,
             handlers: [SBHandler],
             message: SBKikMessage) -> SBResponses {
                 var handlers = handlers
-                if handlers.count > 0 {
-                    let handler = handlers.removeFirst()
-                    return something(handler.handle(responses, incomingMessage: message), handlers: handlers, message: message)
-                } else {
-                    return responses
+                if let handler = handlers.first {
+                    handlers.removeFirst()
+                    if handler.canHandle(message) {
+                        return recursiveHandle(handler.handle(responses, incomingMessage: message), handlers: handlers, message: message)
+                    }
                 }
+                return responses
         }
 
         // Execute Chain
+        let supportedMessageTypes = ["text", "picture", "video"]
         if let messages = message["messages"] as? [JSON] {
             let responses = SBResponses(responseMessages: [])
-            let textMessageResponses = messages
-                .filter{ ($0["type"] as? String) == "text" }
-                .map{ IncomingMessageText.messageWith($0) }
-                .filter{ $0 != nil }
-                .map{ $0! }
-                .map{ something(responses, handlers: self.handlers, message: $0) }
-            return textMessageResponses
+            let incomingMessages = messages
+                .filter {
+                    return ($0["type"] as? String) != nil &&
+                        supportedMessageTypes.contains(($0["type"] as! String))
+                }
+                .map {
+                    switch ($0["type"] as! String) {
+                    case "text":
+                        return SBKikTextMessage.messageWith($0)
+                    case "picture":
+                        return SBKikPictureMessage.messageWith($0)
+                    case "video":
+                        return SBKikVideoMessage.messageWith($0)
+                    default:
+                        return nil
+                    }
+                }
+                .filter { $0 != nil }
+                .map { $0! }
+                .map { recursiveHandle(responses, handlers: self.handlers, message: $0) }
+            return incomingMessages
         }
         return [SBResponses]()
     }

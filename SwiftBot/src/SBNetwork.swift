@@ -27,7 +27,7 @@ enum KikApiRouter: URLRequestConvertible {
     var URLRequest: NSMutableURLRequest {
         let URL = NSURL(string: KikApiRouter.baseURLString)!
         let mutableURLRequest = NSMutableURLRequest(URL: URL.URLByAppendingPathComponent(path))
-        mutableURLRequest.timeoutInterval = 3.0
+        mutableURLRequest.timeoutInterval = 5
         mutableURLRequest.HTTPMethod = method.rawValue
 
         switch self {
