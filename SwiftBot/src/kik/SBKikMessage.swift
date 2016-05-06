@@ -3,6 +3,7 @@ public enum SBKikMessageType {
     case Picture
     case Video
     case Link
+    case ScanData
 
     func toString() -> String {
         switch self {
@@ -14,6 +15,8 @@ public enum SBKikMessageType {
             return "video"
         case .Link:
             return "link"
+        case .ScanData:
+            return "scan-data"
         }
     }
 }
@@ -22,7 +25,7 @@ public enum SBKikKeyboardType {
     case Suggested
 }
 
-internal struct KikKeyboard {
+internal struct SBKikKeyboard {
     let keyboardType: SBKikKeyboardType = .Suggested
     let responses: [SBKikSuggestedResponse]
 
@@ -32,8 +35,11 @@ internal struct KikKeyboard {
         }
     }
 
-    func jsonSerialize() -> JSON {
-        return JSON()
+    func toJSON() -> JSON {
+        return [
+            "type" : "suggested",
+            "responses" : self.responses.map { $0.toJSON() }
+        ]
     }
 }
 
@@ -41,7 +47,7 @@ internal struct SBKikSuggestedResponse {
     let type: String = "text"
     let body: String
 
-    func jsonSerialize() -> JSON {
+    func toJSON() -> JSON {
         return [
                 "type": self.type,
                 "body": self.body
@@ -56,6 +62,7 @@ public protocol SBKikAttribution {
     var iconUrl: String { get }
 }
 
+// MARK: - SBKikMessage
 public protocol SBKikMessage: SBMessage {
     var type: SBKikMessageType { get }
     var chatId: String? { get }
@@ -65,8 +72,9 @@ public protocol SBKikMessage: SBMessage {
     var timestamp: Int? { get }
     var mention: String? { get }
     var to: SBKikUser? { get }
+    var suggestedResponses: [String]? { get }
 
-    func jsonSerialize() -> JSON
+    func toJSON() -> JSON
     func canSend() -> Bool
 }
 
@@ -80,6 +88,7 @@ public struct SBKikVideoMessage: SBKikMessage {
     public var timestamp: Int?
     public var mention: String?
     public var to: SBKikUser?
+    public var suggestedResponses: [String]?
 
     //VIDEO SPECIFIC
     public var videoUrl: String
@@ -94,12 +103,17 @@ public struct SBKikVideoMessage: SBKikMessage {
         return self.to != nil
     }
 
-    public func jsonSerialize() -> JSON {
-        return [
+    public func toJSON() -> JSON {
+        var json: JSON = [
             "to": self.to == nil ? "" : self.to!,
             "type": self.type.toString(),
             "videoUrl": self.videoUrl
         ]
+        if let sugg = self.suggestedResponses {
+            var keyboards = SBKikKeyboard(suggestedResponses: sugg).toJSON()
+            json["keyboards"] = [keyboards]
+        }
+        return json
     }
 
     static func messageWith(json: JSON) -> SBKikMessage? {
@@ -151,7 +165,8 @@ public struct SBKikVideoMessage: SBKikMessage {
         muted: Bool? = nil,
         autoplay: Bool? = nil,
         noSave: Bool? = nil,
-        attribution: SBKikAttribution? = nil) {
+        attribution: SBKikAttribution? = nil,
+        suggestedResponses: [String]? = nil) {
 
         self.chatId = chatId
         self.id = id
@@ -179,6 +194,7 @@ public struct SBKikTextMessage: SBKikMessage {
     public var timestamp: Int?
     public var mention: String?
     public var to: SBKikUser?
+    public var suggestedResponses: [String]?
 
     //TEXT SPECIFIC
     public var body: String
@@ -191,7 +207,8 @@ public struct SBKikTextMessage: SBKikMessage {
         timestamp: Int? = nil,
         mention: String? = nil,
         to: SBKikUser? = nil,
-        body: String) {
+        body: String,
+        suggestedResponses: [String]? = nil) {
 
         self.chatId = chatId
         self.id = id
@@ -201,6 +218,7 @@ public struct SBKikTextMessage: SBKikMessage {
         self.mention = mention
         self.to = to
         self.body = body
+        self.suggestedResponses = suggestedResponses
     }
 
     //OVERRIDE PROTOCOL METHOD
@@ -208,12 +226,17 @@ public struct SBKikTextMessage: SBKikMessage {
         return self.to != nil
     }
 
-    public func jsonSerialize() -> JSON {
-        return [
+    public func toJSON() -> JSON {
+        var json: JSON = [
             "to": self.to == nil ? "" : self.to!,
             "type": self.type.toString(),
-            "body": self.body
+            "body": self.body,
         ]
+        if let sugg = self.suggestedResponses {
+            var keyboards = SBKikKeyboard(suggestedResponses: sugg).toJSON()
+            json["keyboards"] = [keyboards]
+        }
+        return json
     }
 
     static func messageWith(json: JSON) -> SBKikMessage? {
@@ -253,6 +276,7 @@ public struct SBKikPictureMessage: SBKikMessage {
     public var timestamp: Int?
     public var mention: String?
     public var to: SBKikUser?
+    public var suggestedResponses: [String]?
 
     //PICTURE SPECIFIC
     public var attribution: SBKikAttribution?
@@ -263,12 +287,17 @@ public struct SBKikPictureMessage: SBKikMessage {
         return self.to != nil
     }
 
-    public func jsonSerialize() -> JSON {
-        return [
+    public func toJSON() -> JSON {
+        var json: JSON = [
             "to": self.to == nil ? "" : self.to!,
             "type": self.type.toString(),
             "picUrl": self.pictureUrl
         ]
+        if let sugg = self.suggestedResponses {
+            var keyboards = SBKikKeyboard(suggestedResponses: sugg).toJSON()
+            json["keyboards"] = [keyboards]
+        }
+        return json
     }
 
     static func messageWith(json: JSON) -> SBKikMessage? {
@@ -307,7 +336,8 @@ public struct SBKikPictureMessage: SBKikMessage {
         mention: String? = nil,
         to: SBKikUser? = nil,
         attribution: SBKikAttribution? = nil,
-        pictureUrl: String) {
+        pictureUrl: String,
+        suggestedResponses: [String]? = nil) {
 
         self.chatId = chatId
         self.id = id

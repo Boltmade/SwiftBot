@@ -24,7 +24,7 @@ public class KikSwiftBot: SwiftBot {
             .filter {
                 return $0 is SBKikMessage && ($0 as! SBKikMessage).canSend()
             }
-            .map { ($0 as! SBKikMessage).jsonSerialize() }
+            .map { ($0 as! SBKikMessage).toJSON() }
 
         if messages.count > 0 {
             do {
@@ -42,11 +42,14 @@ public class KikSwiftBot: SwiftBot {
             handlers: [SBHandler],
             message: SBKikMessage) -> SBResponses {
                 var handlers = handlers
-                if let handler = handlers.first {
-                    handlers.removeFirst()
-                    if handler.canHandle(message) {
-                        return recursiveHandle(handler.handle(responses, incomingMessage: message), handlers: handlers, message: message)
-                    }
+                var responses = responses
+                if let handler = handlers.first
+                    where handler.canHandle(responses, incomingMessage: message) {
+                        responses = recursiveHandle(handler.handle(responses, incomingMessage: message), handlers: handlers, message: message)
+                }
+                handlers.removeFirst()
+                if handlers.count > 0 {
+                    return recursiveHandle(responses, handlers: handlers, message: message)
                 }
                 return responses
         }

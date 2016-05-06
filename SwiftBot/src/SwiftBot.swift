@@ -9,7 +9,7 @@ struct SBResult<T> {
 
 typealias Handler = (SBResponses, SBMessage) -> SBResponses
 public protocol SBHandler {
-    func canHandle(incomingMessage: SBMessage) -> Bool
+    func canHandle(responses: SBResponses, incomingMessage: SBMessage) -> Bool
     func handle(responses: SBResponses, incomingMessage: SBMessage) -> SBResponses
 }
 
