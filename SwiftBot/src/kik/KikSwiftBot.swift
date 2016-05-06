@@ -55,7 +55,7 @@ public class KikSwiftBot: SwiftBot {
         }
 
         // Execute Chain
-        let supportedMessageTypes = ["text", "picture", "video"]
+        let supportedMessageTypes = ["text", "picture", "video", "scan-data"]
         if let messages = message["messages"] as? [JSON] {
             let responses = SBResponses(responseMessages: [])
             let incomingMessages = messages
@@ -71,6 +71,8 @@ public class KikSwiftBot: SwiftBot {
                         return SBKikPictureMessage.messageWith($0)
                     case "video":
                         return SBKikVideoMessage.messageWith($0)
+                    case "scan-data":
+                        return SBKikScanDataMessage.messageWith($0)
                     default:
                         return nil
                     }
