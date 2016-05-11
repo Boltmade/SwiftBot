@@ -126,7 +126,7 @@ public struct SBKikVideoMessage: SBKikMessage {
 
     static func messageWith(json: JSON) -> SBKikMessage? {
         guard let type = json["type"] as? String
-            where type == "video" else {
+            where type == SBKikMessageType.Video.toString() else {
                 return nil
         }
 
@@ -250,7 +250,7 @@ public struct SBKikTextMessage: SBKikMessage {
 
     static func messageWith(json: JSON) -> SBKikMessage? {
         guard let type = json["type"] as? String
-            where type == "text" else {
+            where type == SBKikMessageType.Text.toString() else {
                 return nil
         }
 
@@ -391,7 +391,7 @@ public struct SBKikPictureMessage: SBKikMessage {
 
     static func messageWith(json: JSON) -> SBKikMessage? {
         guard let type = json["type"] as? String
-            where type == "picture" else {
+            where type == SBKikMessageType.Picture.toString() else {
                 return nil
         }
 
@@ -437,6 +437,82 @@ public struct SBKikPictureMessage: SBKikMessage {
         self.to = to
         self.attribution = attribution
         self.pictureUrl = pictureUrl
+    }
+}
+
+// MARK: - SBKikLinkMessage
+public struct SBKikLinkMessage: SBKikMessage {
+    //SBKIKMESSAGE PROTOCOL
+    public var type: SBKikMessageType = .Picture
+    public var chatId: String?
+    public var id: String?
+    public var from: SBKikUser?
+    public var participants: [SBKikUser]?
+    public var timestamp: Int?
+    public var mention: String?
+    public var to: SBKikUser?
+    public var suggestedResponses: [String]?
+
+    //LINK SPECIFIC
+
+    //OVERRIDE PROTOCOL METHOD
+    public func canSend() -> Bool {
+        return self.to != nil
+    }
+
+    public func toJSON() -> JSON {
+        var json: JSON = [
+            "to": self.to == nil ? "" : self.to!,
+            "type": self.type.toString(),
+        ]
+        if let sugg = self.suggestedResponses {
+            var keyboards = SBKikKeyboard(suggestedResponses: sugg).toJSON()
+            json["keyboards"] = [keyboards]
+        }
+        return json
+    }
+
+    static func messageWith(json: JSON) -> SBKikMessage? {
+        guard let type = json["type"] as? String
+            where type == SBKikMessageType.Link.toString() else {
+                return nil
+        }
+
+        if let chatId = json["chatId"] as? String,
+            let id = json["id"] as? String,
+            let typeString = json["type"] as? String,
+            let from = json["from"] as? SBKikUser,
+            let timestampAny = json["timestamp"] as? Int {
+
+            return SBKikLinkMessage(
+                chatId: chatId,
+                id: id,
+                from: from,
+                participants: nil,
+                timestamp: timestampAny,
+                mention: nil,
+                to: nil)
+        }
+        return nil
+    }
+
+    public init(
+        chatId: String? = nil,
+        id: String? = nil,
+        from: SBKikUser? = nil,
+        participants: [SBKikUser]? = nil,
+        timestamp: Int? = nil,
+        mention: String? = nil,
+        to: SBKikUser? = nil,
+        suggestedResponses: [String]? = nil) {
+
+        self.chatId = chatId
+        self.id = id
+        self.from = from
+        self.participants = participants
+        self.timestamp = timestamp
+        self.mention = mention
+        self.to = to
     }
 }
 

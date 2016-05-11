@@ -43,19 +43,24 @@ public class KikSwiftBot: SwiftBot {
             message: SBKikMessage) -> SBResponses {
                 var handlers = handlers
                 var responses = responses
-                if let handler = handlers.first
-                    where handler.canHandle(responses, incomingMessage: message) {
-                        responses = recursiveHandle(handler.handle(responses, incomingMessage: message), handlers: handlers, message: message)
+            if handlers.count > 0 {
+                let handler = handlers.removeFirst()
+                if handler.canHandle(responses, incomingMessage: message) {
+                    responses = recursiveHandle(handler.handle(responses, incomingMessage: message), handlers: handlers, message: message)
                 }
-                handlers.removeFirst()
-                if handlers.count > 0 {
-                    return recursiveHandle(responses, handlers: handlers, message: message)
-                }
-                return responses
+                return recursiveHandle(responses, handlers: handlers, message: message)
+            }
+            return responses
         }
 
         // Execute Chain
-        let supportedMessageTypes = ["text", "picture", "video", "scan-data"]
+        let supportedMessageTypes = [
+            SBKikMessageType.Text.toString(),
+            SBKikMessageType.Picture.toString(),
+            SBKikMessageType.Video.toString(),
+            SBKikMessageType.ScanData.toString(),
+            SBKikMessageType.Link.toString()
+        ]
         if let messages = message["messages"] as? [JSON] {
             let responses = SBResponses(responseMessages: [])
             let incomingMessages = messages
