@@ -6,12 +6,12 @@ enum KikApiRouter: URLRequestConvertible {
     case KikConfigure(webHook: String, features: [String: Bool])
     case KikSendMessage(kikMessages: [JSON])
 
-    var method: Alamofire.Method {
+    var method: String {
         switch self {
         case .KikConfigure:
-            return .POST
+            return "POST"
         case .KikSendMessage(_):
-            return .POST
+            return "POST"
         }
     }
 
@@ -24,19 +24,33 @@ enum KikApiRouter: URLRequestConvertible {
         }
     }
 
+    var HTTPBody: NSData? {
+        switch self {
+        case .KikConfigure(let webHook, let features):
+            let params = [
+                "webhook": webHook,
+                "features": features
+            ]
+            do {
+                return try NSJSONSerialization.dataWithJSONObject(params, options: .PrettyPrinted)
+            } catch {
+                return nil
+            }
+        default:
+            return nil
+        }
+    }
+
     var URLRequest: NSMutableURLRequest {
         let URL = NSURL(string: KikApiRouter.baseURLString)!
         let mutableURLRequest = NSMutableURLRequest(URL: URL.URLByAppendingPathComponent(path))
         mutableURLRequest.timeoutInterval = 5
-        mutableURLRequest.HTTPMethod = method.rawValue
+        mutableURLRequest.HTTPMethod = method
 
         switch self {
         case .KikConfigure(let webHook, let features):
-            return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters:
-                [
-                    "webhook": webHook,
-                    "features": features
-                ]).0
+            mutableURLRequest.HTTPBody = self.HTTPBody
+            return mutableURLRequest
         case .KikSendMessage(let kikMessages):
             return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters:
                 [
