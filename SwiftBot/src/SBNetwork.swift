@@ -48,7 +48,7 @@ enum KikApiRouter: URLRequestConvertible {
         mutableURLRequest.HTTPMethod = method
 
         switch self {
-        case .KikConfigure(let webHook, let features):
+        case .KikConfigure(_):
             mutableURLRequest.HTTPBody = self.HTTPBody
             return mutableURLRequest
         case .KikSendMessage(let kikMessages):
