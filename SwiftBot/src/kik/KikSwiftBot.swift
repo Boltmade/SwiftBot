@@ -1,5 +1,4 @@
 import Foundation
-import Alamofire
 
 internal let KikUsername = "KikUsernameKey"
 internal let KikAPIKey = "KikUsernameKey"
@@ -108,17 +107,21 @@ extension KikSwiftBot {
                 throw KikError.BadConfifguration
         }
 
-        Alamofire
-            .request(KikApiRouter.KikSendMessage(kikMessages: kikMessages))
-            .authenticate(user: config.username, password: config.key)
-            .validate()
-            .responseJSON() { (firedResponse) -> Void in
-                if let error = firedResponse.result.error {
-                    print("Send message failed: \(error)")
-                } else {
-                    print("Successful send")
-                }
+        let request = KikApiRouter
+            .KikSendMessage(kikMessages: kikMessages)
+            .URLRequest
+            .authenticate(config.username, password: config.key)
+
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+            if let httpResponse = response as? NSHTTPURLResponse
+                where httpResponse.statusCode == 200 {
+                print("Send message failed: \(error)")
+            } else {
+                print("Send message failed: \(error)")
+            }
         }
+        task.resume()
     }
 
     public func kikConfigure(username: String, APIKey: String, webHook: String) {

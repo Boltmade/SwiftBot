@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5316590F1CDA3BAF00E72E78 /* Alamofire.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 535B50491CDA30BB007EC6D7 /* Alamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		535B504A1CDA30BB007EC6D7 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 535B50491CDA30BB007EC6D7 /* Alamofire.framework */; };
 		53822E0B1CD9173B00AC92E9 /* SwiftBot.h in Headers */ = {isa = PBXBuildFile; fileRef = 53822E0A1CD9173B00AC92E9 /* SwiftBot.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		53822E121CD9173B00AC92E9 /* SwiftBot.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53822E071CD9173B00AC92E9 /* SwiftBot.framework */; };
 		53822E171CD9173B00AC92E9 /* SwiftBotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53822E161CD9173B00AC92E9 /* SwiftBotTests.swift */; };
@@ -29,21 +27,7 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		5316590E1CDA3BA500E72E78 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				5316590F1CDA3BAF00E72E78 /* Alamofire.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		535B50491CDA30BB007EC6D7 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/Mac/Alamofire.framework; sourceTree = "<group>"; };
 		53822E071CD9173B00AC92E9 /* SwiftBot.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftBot.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		53822E0A1CD9173B00AC92E9 /* SwiftBot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftBot.h; sourceTree = "<group>"; };
 		53822E0C1CD9173B00AC92E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -62,7 +46,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				535B504A1CDA30BB007EC6D7 /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,7 +63,6 @@
 		53822DFD1CD9173B00AC92E9 = {
 			isa = PBXGroup;
 			children = (
-				535B50491CDA30BB007EC6D7 /* Alamofire.framework */,
 				53822E091CD9173B00AC92E9 /* SwiftBot */,
 				53822E151CD9173B00AC92E9 /* SwiftBotTests */,
 				53822E081CD9173B00AC92E9 /* Products */,
@@ -157,8 +139,6 @@
 				53822E031CD9173B00AC92E9 /* Frameworks */,
 				53822E041CD9173B00AC92E9 /* Headers */,
 				53822E051CD9173B00AC92E9 /* Resources */,
-				535B504B1CDA31B6007EC6D7 /* ShellScript */,
-				5316590E1CDA3BA500E72E78 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -239,23 +219,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		535B504B1CDA31B6007EC6D7 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/Mac/Alamofire.framework",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		53822E021CD9173B00AC92E9 /* Sources */ = {

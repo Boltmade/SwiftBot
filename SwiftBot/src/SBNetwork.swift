@@ -1,6 +1,6 @@
 import Alamofire
 
-enum KikApiRouter: URLRequestConvertible {
+enum KikApiRouter {
     static let baseURLString = "https://api.kik.com/v1"
 
     case KikConfigure(webHook: String, features: [String: Bool])
@@ -37,8 +37,16 @@ enum KikApiRouter: URLRequestConvertible {
             } catch {
                 return nil
             }
-        default:
-            return nil
+        case .KikSendMessage(let messages):
+            let params = [
+                "messages": messages
+            ]
+            do {
+                return try NSJSONSerialization
+                    .dataWithJSONObject(params, options: .PrettyPrinted)
+            } catch {
+                return nil
+            }
         }
     }
 
@@ -53,11 +61,9 @@ enum KikApiRouter: URLRequestConvertible {
         case .KikConfigure(_):
             mutableURLRequest.HTTPBody = self.HTTPBody
             return mutableURLRequest
-        case .KikSendMessage(let kikMessages):
-            return Alamofire.ParameterEncoding.JSON.encode(mutableURLRequest, parameters:
-                [
-                    "messages": kikMessages
-                ]).0
+        case .KikSendMessage(_):
+            mutableURLRequest.HTTPBody = self.HTTPBody
+            return mutableURLRequest
         }
     }
 }
@@ -67,7 +73,6 @@ extension NSMutableURLRequest {
         let authStr = "\(username):\(password)"
         let authData = authStr.dataUsingEncoding(NSUTF8StringEncoding)
         let header = "Basic \(authData!.base64EncodedStringWithOptions(.EncodingEndLineWithCarriageReturn)))"
-        print(header)
         self.setValue(header, forHTTPHeaderField: "Authorization")
         return self
     }
