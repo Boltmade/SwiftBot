@@ -1,5 +1,3 @@
-import Alamofire
-
 enum KikApiRouter {
     static let baseURLString = "https://api.kik.com/v1"
 
