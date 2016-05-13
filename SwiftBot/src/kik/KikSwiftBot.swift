@@ -123,26 +123,28 @@ extension KikSwiftBot {
 
     public func kikConfigure(username: String, APIKey: String, webHook: String) {
 
-        Alamofire
-            .request(KikApiRouter.KikConfigure(
-                webHook: webHook,
-                features: [
-                    "manuallySendReadReceipts": false,
-                    "receiveReadReceipts": false,
-                    "receiveDeliveryReceipts": false,
-                    "receiveIsTyping": false
-                ]))
-            .authenticate(user: username, password: APIKey)
-            .validate()
-            .responseJSON() { (firedResponse) -> Void in
-                if let error = firedResponse.result.error {
-                    print("Kik Bot configuration failed: \(error)")
-                } else {
-                    self.successfulConfig = true
-                    self.botUsername = username
-                    self.apiKey = APIKey
-                    print("Kik Bot successfully configured")
-                }
+        let features = [
+            "manuallySendReadReceipts": false,
+            "receiveReadReceipts": false,
+            "receiveDeliveryReceipts": false,
+            "receiveIsTyping": false
+        ]
+        let request = KikApiRouter
+            .KikConfigure(webHook: webHook, features: features)
+            .URLRequest
+            .authenticate(username, password: APIKey)
+
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+            if let error = error {
+                print("Kik Bot configuration failed: \(error)")
+            } else {
+                self.successfulConfig = true
+                self.botUsername = username
+                self.apiKey = APIKey
+                print("Kik Bot successfully configured")
             }
+        }
+        task.resume()
     }
 }

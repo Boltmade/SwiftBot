@@ -26,13 +26,14 @@ enum KikApiRouter: URLRequestConvertible {
 
     var HTTPBody: NSData? {
         switch self {
-        case .KikConfigure(let webHook, let features):
+        case .KikConfigure(let params):
             let params = [
-                "webhook": webHook,
-                "features": features
+                "webhook": params.webHook,
+                "features": params.features
             ]
             do {
-                return try NSJSONSerialization.dataWithJSONObject(params, options: .PrettyPrinted)
+                return try NSJSONSerialization
+                    .dataWithJSONObject(params, options: .PrettyPrinted)
             } catch {
                 return nil
             }
@@ -57,5 +58,15 @@ enum KikApiRouter: URLRequestConvertible {
                     "messages": kikMessages
                 ]).0
         }
+    }
+}
+
+extension NSMutableURLRequest {
+    func authenticate(username: String, password: String) -> NSMutableURLRequest {
+        let authStr = "\(username):\(password)"
+        let authData = authStr.dataUsingEncoding(NSUTF8StringEncoding)
+        let header = "Basic \(authData?.base64EncodedDataWithOptions(.EncodingEndLineWithCarriageReturn)))"
+        self.setValue(header, forHTTPHeaderField: "Authorization")
+        return self
     }
 }
