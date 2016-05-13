@@ -47,6 +47,7 @@ enum KikApiRouter: URLRequestConvertible {
         let mutableURLRequest = NSMutableURLRequest(URL: URL.URLByAppendingPathComponent(path))
         mutableURLRequest.timeoutInterval = 5
         mutableURLRequest.HTTPMethod = method
+        mutableURLRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         switch self {
         case .KikConfigure(_):
