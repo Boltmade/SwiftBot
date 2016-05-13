@@ -62,7 +62,7 @@ enum KikApiRouter: URLRequestConvertible {
 }
 
 extension NSMutableURLRequest {
-    func authenticate(username: String, password: String) -> NSMutableURLRequest {
+    func authenticate(username: String, password: String) -> Self {
         let authStr = "\(username):\(password)"
         let authData = authStr.dataUsingEncoding(NSUTF8StringEncoding)
         let header = "Basic \(authData!.base64EncodedStringWithOptions(.EncodingEndLineWithCarriageReturn)))"
