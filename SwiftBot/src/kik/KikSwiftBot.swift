@@ -143,6 +143,14 @@ extension KikSwiftBot {
                 self.botUsername = username
                 self.apiKey = APIKey
                 print("Kik Bot successfully configured")
+
+                do {
+                    if let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? JSON {
+                        print(json)
+                    }
+                } catch {
+                    print("Error processing")
+                }
             }
         }
         task.resume()
