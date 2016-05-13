@@ -145,6 +145,7 @@ extension KikSwiftBot {
                 print("Kik Bot successfully configured")
 
                 do {
+                    print(data)
                     if let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? JSON {
                         print(json)
                     }

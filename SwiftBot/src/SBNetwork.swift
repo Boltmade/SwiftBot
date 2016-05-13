@@ -65,6 +65,7 @@ extension NSMutableURLRequest {
     func authenticate(username: String, password: String) -> NSMutableURLRequest {
         let authStr = "\(username):\(password)"
         let authData = authStr.dataUsingEncoding(NSUTF8StringEncoding)
+        print("DATA: \(authData?.base64EncodedDataWithOptions(.EncodingEndLineWithCarriageReturn))")
         let header = "Basic \(authData?.base64EncodedDataWithOptions(.EncodingEndLineWithCarriageReturn)))"
         self.setValue(header, forHTTPHeaderField: "Authorization")
         return self
