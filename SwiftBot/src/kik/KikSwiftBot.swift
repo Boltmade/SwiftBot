@@ -136,22 +136,14 @@ extension KikSwiftBot {
 
         let session = NSURLSession.sharedSession()
         let task = session.dataTaskWithRequest(request) { (data, response, error) in
-            if let error = error {
-                print("Kik Bot configuration failed: \(error)")
-            } else {
+            if let httpResponse = response as? NSHTTPURLResponse
+                where httpResponse.statusCode == 200 {
                 self.successfulConfig = true
                 self.botUsername = username
                 self.apiKey = APIKey
                 print("Kik Bot successfully configured")
-
-                do {
-                    print(String(data: data!, encoding: NSUTF8StringEncoding))
-                    if let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? JSON {
-                        print(json)
-                    }
-                } catch {
-                    print("Error processing")
-                }
+            } else {
+                print("Kik Bot configuration failed: \(error)")
             }
         }
         task.resume()
